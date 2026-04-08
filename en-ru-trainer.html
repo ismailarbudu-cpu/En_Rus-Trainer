@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Trainer · Англо-Русский Тренажёр</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:    #00247D;
+    --red:     #CF142B;
+    --gold:    #F4C430;
+    --dark:    #0A0F1E;
+    --navy:    #0D1B3E;
+    --ink:     #1A1F3A;
+    --parchment: #F5F7FF;
+    --muted:   #6B7399;
+    --light-blue: #E8EDF8;
+    --accent:  #F4C430;
+    --green-ok: #1B7F3A;
+    --red-err: #B71C1C;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--parchment);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== SPLASH ===== */
+  #splash {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0A0F1E 0%, #0D1B3E 45%, #12204A 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #splash::before {
+    content: 'A';
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: 700px;
+    font-weight: 900;
+    color: rgba(244,196,48,0.04);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* Union Jack decorative lines */
+  #splash::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(45deg,  transparent 48%, rgba(207,20,43,0.04) 48%, rgba(207,20,43,0.04) 52%, transparent 52%),
+      linear-gradient(-45deg, transparent 48%, rgba(207,20,43,0.04) 48%, rgba(207,20,43,0.04) 52%, transparent 52%),
+      linear-gradient(0deg,   transparent 48%, rgba(0,36,125,0.05) 48%, rgba(0,36,125,0.05) 52%, transparent 52%),
+      linear-gradient(90deg,  transparent 48%, rgba(0,36,125,0.05) 48%, rgba(0,36,125,0.05) 52%, transparent 52%);
+    pointer-events: none;
+  }
+
+  .splash-header {
+    text-align: center;
+    margin-bottom: 44px;
+    z-index: 1;
+    position: relative;
+  }
+
+  .splash-header .en-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 9vw, 88px);
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 0 50px rgba(244,196,48,0.25);
+    margin-bottom: 8px;
+    display: block;
+    letter-spacing: -2px;
+  }
+
+  .splash-header .ru-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(14px, 2.5vw, 18px);
+    color: rgba(245,247,255,0.75);
+    letter-spacing: 7px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .splash-header .subtitle {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  .divider {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 18px auto;
+  }
+
+  .flag-strip {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .flag-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .flag-dot:nth-child(1) { background: var(--red); }
+  .flag-dot:nth-child(2) { background: white; }
+  .flag-dot:nth-child(3) { background: var(--blue); }
+
+  /* TOPICS GRID */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 10px;
+    max-width: 920px;
+    width: 100%;
+    z-index: 1;
+    position: relative;
+  }
+
+  .topic-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(244,196,48,0.15);
+    border-radius: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+  .topic-btn:hover {
+    background: rgba(0,36,125,0.25);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(244,196,48,0.12);
+  }
+  .topic-btn .icon { font-size: 26px; min-width: 34px; text-align: center; }
+  .topic-btn .label { display: flex; flex-direction: column; }
+  .topic-btn .label-ru { font-size: 13px; font-weight: 600; color: var(--parchment); line-height: 1.3; }
+  .topic-btn .label-en { font-size: 11px; color: var(--gold); opacity: 0.8; font-style: italic; }
+  .topic-btn .num { margin-left: auto; font-size: 10px; color: var(--muted); background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+
+  /* ===== TRAINER ===== */
+  #trainer {
+    display: none;
+    min-height: 100vh;
+    background: var(--parchment);
+    color: var(--ink);
+    flex-direction: column;
+  }
+  #trainer.active { display: flex; }
+
+  .trainer-header {
+    background: linear-gradient(135deg, var(--blue), #001A5C);
+    color: white;
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  }
+
+  .back-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .trainer-header-info { flex: 1; }
+  .trainer-header-info h2 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; }
+  .trainer-header-info .en-topic { font-size: 12px; opacity: 0.7; font-style: italic; }
+
+  .progress-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .progress-text { font-size: 13px; opacity: 0.85; }
+  .progress-bar-outer { width: 90px; height: 6px; background: rgba(255,255,255,0.25); border-radius: 3px; overflow: hidden; }
+  .progress-bar-inner { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.4s ease; }
+  .score-display { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 4px 12px; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+  .trainer-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* MODE TABS */
+  .mode-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 26px;
+    background: rgba(0,0,0,0.07);
+    padding: 5px;
+    border-radius: 14px;
+  }
+  .mode-tab {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .mode-tab.active {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 3px 14px rgba(0,36,125,0.3);
+  }
+
+  /* VOICE STATUS */
+  .voice-status {
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: rgba(0,36,125,0.07);
+    color: var(--muted);
+    margin-bottom: 14px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .voice-status.ok { background: #E8F5E9; color: #2E7D32; }
+  .voice-status.warn { background: #FFF8E1; color: #F57F17; }
+
+  /* FLASHCARD */
+  .flashcard-wrap {
+    perspective: 1100px;
+    width: 100%;
+    max-width: 460px;
+    margin-bottom: 24px;
+  }
+  .flashcard {
+    width: 100%;
+    min-height: 230px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    cursor: pointer;
+    border-radius: 22px;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 28px 22px;
+    box-shadow: 0 14px 45px rgba(0,0,0,0.13);
+  }
+  .card-front {
+    background: white;
+    border: 2px solid rgba(0,36,125,0.1);
+  }
+  .card-back {
+    background: linear-gradient(135deg, var(--blue), #001A5C);
+    color: white;
+    transform: rotateY(180deg);
+  }
+
+  .card-hint { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  .card-back .card-hint { color: rgba(255,255,255,0.55); }
+
+  .card-main {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 6vw, 50px);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .card-back .card-main { color: white; font-family: 'DM Sans', sans-serif; font-size: clamp(22px, 4vw, 32px); }
+
+  .card-transcription {
+    font-size: 16px;
+    color: var(--blue);
+    margin-top: 5px;
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .card-back .card-transcription { color: var(--gold); }
+
+  .flip-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    opacity: 0.55;
+  }
+
+  /* SPEAK BTN */
+  .speak-btn {
+    background: none;
+    border: 2px solid rgba(0,36,125,0.2);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+  .speak-btn:hover { background: var(--blue); color: white; border-color: var(--blue); transform: scale(1.1); }
+  .speak-btn.speaking { animation: pulse-speak 0.6s infinite alternate; background: var(--blue); color: white; border-color: var(--blue); }
+  @keyframes pulse-speak { from { transform: scale(1); } to { transform: scale(1.15); box-shadow: 0 0 16px rgba(0,36,125,0.4); } }
+
+  .speak-btn-white {
+    background: rgba(255,255,255,0.14);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: white;
+  }
+  .speak-btn-white:hover { background: rgba(255,255,255,0.3); border-color: white; color: white; transform: scale(1.1); }
+  .speak-btn-white.speaking { animation: pulse-speak-w 0.6s infinite alternate; background: rgba(255,255,255,0.35); }
+  @keyframes pulse-speak-w { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+  .speak-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+  .speak-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  .card-nav { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+  .card-nav button {
+    background: white;
+    border: 2px solid rgba(0,36,125,0.18);
+    color: var(--blue);
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  }
+  .card-nav button:hover { background: var(--blue); color: white; border-color: var(--blue); }
+  .card-nav .card-counter { font-size: 13px; color: var(--muted); min-width: 60px; text-align: center; }
+
+  /* QUIZ */
+  .quiz-card {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 14px 42px rgba(0,0,0,0.09);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .quiz-question-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+  .quiz-question { font-family: 'Playfair Display', serif; font-size: clamp(28px, 6vw, 46px); font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+  .quiz-transcription { text-align: center; font-size: 16px; color: var(--blue); font-style: italic; margin-bottom: 4px; }
+  .quiz-speak-row { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px; }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 500px;
+  }
+  .option-btn {
+    background: white;
+    border: 2px solid rgba(0,36,125,0.12);
+    border-radius: 12px;
+    padding: 14px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: all 0.18s;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--blue); background: var(--light-blue); transform: translateY(-1px); }
+  .option-btn.correct { background: #E8F5E9; border-color: #43A047; color: #2E7D32; }
+  .option-btn.wrong   { background: #FFEBEE; border-color: #E53935; color: #C62828; }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-bar {
+    width: 100%;
+    max-width: 500px;
+    padding: 13px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+    margin-top: 8px;
+    display: none;
+  }
+  .feedback-bar.show { display: block; }
+  .feedback-bar.ok   { background: #E8F5E9; color: #2E7D32; }
+  .feedback-bar.fail { background: #FFEBEE; color: #C62828; }
+
+  .next-btn {
+    margin-top: 14px;
+    background: linear-gradient(135deg, var(--blue), #001A5C);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 40px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0,36,125,0.28);
+    transition: all 0.2s;
+    display: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,36,125,0.38); }
+
+  /* WRITING */
+  .writing-card {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 14px 42px rgba(0,0,0,0.09);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .writing-prompt-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  .writing-prompt { font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+  .writing-hint { font-size: 13px; color: var(--muted); margin-bottom: 18px; font-style: italic; }
+  .writing-input {
+    width: 100%;
+    padding: 13px 18px;
+    border: 2px solid rgba(0,36,125,0.18);
+    border-radius: 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    text-align: center;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    background: #F9FAFF;
+  }
+  .writing-input:focus { border-color: var(--blue); }
+  .writing-input.correct-input { border-color: #43A047; background: #E8F5E9; }
+  .writing-input.wrong-input   { border-color: #E53935; background: #FFEBEE; }
+
+  .check-btn {
+    margin-top: 14px;
+    background: linear-gradient(135deg, var(--blue), #001A5C);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 36px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0,36,125,0.28);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .check-btn:hover { transform: translateY(-1px); }
+
+  .answer-reveal { margin-top: 12px; font-family: 'Playfair Display', serif; font-size: 22px; color: var(--blue); display: none; }
+  .answer-reveal.show { display: block; }
+
+  /* RESULT */
+  .result-screen { display:flex; flex-direction:column; align-items:center; padding:40px 20px; text-align:center; max-width:500px; margin:0 auto; }
+  .result-emoji { font-size: 72px; margin-bottom: 16px; }
+  .result-score { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; color: var(--ink); line-height: 1; }
+  .result-label { font-size: 18px; color: var(--muted); margin: 8px 0 22px; }
+  .result-msg { font-size: 15px; color: var(--ink); background: white; border-radius: 16px; padding: 16px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); margin-bottom: 24px; line-height: 1.6; }
+  .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .result-actions button { padding: 13px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; font-family: 'DM Sans', sans-serif; }
+  .btn-retry { background: linear-gradient(135deg, var(--blue), #001A5C); color: white; box-shadow: 0 6px 22px rgba(0,36,125,0.28); }
+  .btn-retry:hover { transform: translateY(-2px); }
+  .btn-home { background: white; color: var(--ink); border: 2px solid rgba(0,0,0,0.1) !important; }
+  .btn-home:hover { background: #F0F0F0; }
+
+  /* WORD LIST */
+  .word-list-panel { width:100%; max-width:500px; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,0.07); margin-top:14px; }
+  .word-list-toggle { width:100%; background:none; border:none; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:13px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:1px; font-family:'DM Sans',sans-serif; }
+  .word-list-body { display:none; padding:0 16px 16px; }
+  .word-list-body.open { display:block; }
+  .word-row { display:flex; align-items:center; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05); gap:10px; font-size:13px; }
+  .word-row:last-child { border-bottom:none; }
+  .wr-en { font-family:'Playfair Display',serif; font-size:17px; color:var(--blue); min-width:100px; font-weight:700; }
+  .wr-tr { color:var(--muted); font-style:italic; flex:1; font-size:12px; }
+  .wr-ru { color:var(--ink); font-weight:600; flex:1; }
+  .wr-speak { background:none; border:1.5px solid rgba(0,36,125,0.2); border-radius:50%; width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--blue);display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0; }
+  .wr-speak:hover { background:var(--blue); color:white; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-header">
+    <div class="flag-strip"><div class="flag-dot"></div><div class="flag-dot"></div><div class="flag-dot"></div></div>
+    <span class="en-title">English</span>
+    <div class="ru-title">Англо-Русский Тренажёр</div>
+    <div class="divider"></div>
+    <div class="subtitle">23 темы · Карточки · Тест · Письмо · 🔊 Озвучка</div>
+  </div>
+  <div class="topics-grid" id="topicsGrid"></div>
+</div>
+
+<!-- TRAINER -->
+<div id="trainer">
+  <div class="trainer-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="trainer-header-info">
+      <h2 id="headerTitle"></h2>
+      <div class="en-topic" id="headerEn"></div>
+    </div>
+    <div class="progress-wrap">
+      <span class="progress-text" id="progText">0/0</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progBar" style="width:0%"></div></div>
+    </div>
+    <div class="score-display" id="scoreDisp">★ 0</div>
+  </div>
+
+  <div class="trainer-body">
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('flash')">🃏 Карточки</button>
+      <button class="mode-tab" onclick="switchMode('quiz')">❓ Тест</button>
+      <button class="mode-tab" onclick="switchMode('write')">✍️ Письмо</button>
+    </div>
+
+    <!-- FLASHCARD MODE -->
+    <div id="modeFlash" style="display:flex;flex-direction:column;align-items:center;width:100%">
+      <div id="voiceStatus" class="voice-status">🔊 Google TTS · British English</div>
+      <div class="flashcard-wrap">
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="card-face card-front">
+            <div class="card-hint">Английское слово</div>
+            <div class="card-main" id="fcFront">-</div>
+            <div class="card-transcription" id="fcTranscription"></div>
+            <div class="speak-row" onclick="event.stopPropagation()">
+              <button class="speak-btn" onclick="speakCurrent()" title="Произнести по-английски">🔊</button>
+              <span class="speak-label">послушать</span>
+            </div>
+            <div class="flip-hint" style="margin-top:6px">🔄 нажмите для перевода</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-hint">Перевод на русский</div>
+            <div class="card-main" id="fcBack">-</div>
+            <div class="card-transcription" id="fcBackSub"></div>
+            <div class="speak-row" onclick="event.stopPropagation()" style="margin-top:10px">
+              <button class="speak-btn speak-btn-white" onclick="speakCurrent()" title="Повторить">🔊</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-nav">
+        <button onclick="prevCard()">←</button>
+        <span class="card-counter" id="cardCounter">1 / 10</span>
+        <button onclick="nextCard()">→</button>
+      </div>
+      <div class="word-list-panel" style="margin-top:22px">
+        <button class="word-list-toggle" onclick="toggleWordList()">
+          📋 Все слова темы <span id="wlArrow">▼</span>
+        </button>
+        <div class="word-list-body" id="wordListBody"></div>
+      </div>
+    </div>
+
+    <!-- QUIZ MODE -->
+    <div id="modeQuiz" class="hidden" style="display:flex;flex-direction:column;align-items:center;width:100%">
+      <div class="quiz-card">
+        <div class="quiz-question-label">Что означает это слово?</div>
+        <div class="quiz-question" id="qQuestion">-</div>
+        <div class="quiz-transcription" id="qTranscription"></div>
+        <div class="quiz-speak-row">
+          <button class="speak-btn" onclick="speakText(document.getElementById('qQuestion').textContent)" title="Произнести">🔊</button>
+          <span style="font-size:11px;color:var(--muted)">послушать</span>
+        </div>
+      </div>
+      <div class="options-grid" id="optionsGrid"></div>
+      <div class="feedback-bar" id="feedbackBar"></div>
+      <button class="next-btn" id="nextQBtn" onclick="nextQuestion()">Следующий →</button>
+    </div>
+
+    <!-- WRITE MODE -->
+    <div id="modeWrite" class="hidden" style="display:flex;flex-direction:column;align-items:center;width:100%">
+      <div class="writing-card">
+        <div class="writing-prompt-label">Напишите по-английски</div>
+        <div class="writing-prompt" id="wPrompt">-</div>
+        <div class="writing-hint" id="wHint"></div>
+        <input class="writing-input" id="wInput" type="text" placeholder="Type in English..." onkeydown="if(event.key==='Enter')checkWrite()">
+        <button class="check-btn" onclick="checkWrite()">Проверить ✓</button>
+        <div class="answer-reveal" id="wReveal"></div>
+      </div>
+      <button class="next-btn show" id="nextWBtn" onclick="nextWrite()" style="display:none">Следующее →</button>
+    </div>
+
+    <!-- RESULT -->
+    <div id="modeResult" class="hidden">
+      <div class="result-screen">
+        <div class="result-emoji" id="resEmoji">🎉</div>
+        <div class="result-score" id="resScore">0/0</div>
+        <div class="result-label">правильных ответов</div>
+        <div class="result-msg" id="resMsg"></div>
+        <div class="result-actions">
+          <button class="btn-retry" onclick="retryMode()">🔄 Повторить</button>
+          <button class="btn-home" onclick="goHome()">🏠 К темам</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA (23 TOPICS) ====================
+const TOPICS = [
+  {
+    id:1, icon:'👋', ru:'Приветствия', en:'Greetings',
+    words:[
+      {en:'Hello',        tr:'/həˈləʊ/',      ru:'Привет / Здравствуйте'},
+      {en:'Good morning', tr:'/ɡʊd ˈmɔːnɪŋ/', ru:'Доброе утро'},
+      {en:'Good evening', tr:'/ɡʊd ˈiːvnɪŋ/', ru:'Добрый вечер'},
+      {en:'Goodbye',      tr:'/ɡʊdˈbaɪ/',     ru:'До свидания'},
+      {en:'Thank you',    tr:'/θæŋk juː/',     ru:'Спасибо'},
+      {en:'Sorry',        tr:'/ˈsɒri/',        ru:'Извините / Прошу прощения'},
+      {en:'Please',       tr:'/pliːz/',        ru:'Пожалуйста'},
+      {en:'Yes',          tr:'/jes/',          ru:'Да'},
+      {en:'No',           tr:'/nəʊ/',          ru:'Нет'},
+      {en:"You're welcome",tr:'/jɔː ˈwelkəm/',ru:'Пожалуйста (не за что)'},
+    ]
+  },
+  {
+    id:2, icon:'🔢', ru:'Числа 1–20', en:'Numbers 1–20',
+    words:[
+      {en:'One',      tr:'/wʌn/',      ru:'Один'},
+      {en:'Two',      tr:'/tuː/',      ru:'Два'},
+      {en:'Three',    tr:'/θriː/',     ru:'Три'},
+      {en:'Four',     tr:'/fɔː/',      ru:'Четыре'},
+      {en:'Five',     tr:'/faɪv/',     ru:'Пять'},
+      {en:'Six',      tr:'/sɪks/',     ru:'Шесть'},
+      {en:'Seven',    tr:'/ˈsevn/',    ru:'Семь'},
+      {en:'Eight',    tr:'/eɪt/',      ru:'Восемь'},
+      {en:'Nine',     tr:'/naɪn/',     ru:'Девять'},
+      {en:'Ten',      tr:'/ten/',      ru:'Десять'},
+      {en:'Twenty',   tr:'/ˈtwenti/',  ru:'Двадцать'},
+      {en:'Hundred',  tr:'/ˈhʌndrəd/',ru:'Сто'},
+    ]
+  },
+  {
+    id:3, icon:'🎨', ru:'Цвета', en:'Colours',
+    words:[
+      {en:'Red',    tr:'/red/',     ru:'Красный'},
+      {en:'Blue',   tr:'/bluː/',    ru:'Синий'},
+      {en:'Green',  tr:'/ɡriːn/',   ru:'Зелёный'},
+      {en:'Yellow', tr:'/ˈjeləʊ/',  ru:'Жёлтый'},
+      {en:'White',  tr:'/waɪt/',    ru:'Белый'},
+      {en:'Black',  tr:'/blæk/',    ru:'Чёрный'},
+      {en:'Orange', tr:'/ˈɒrɪndʒ/',ru:'Оранжевый'},
+      {en:'Pink',   tr:'/pɪŋk/',    ru:'Розовый'},
+      {en:'Purple', tr:'/ˈpɜːpl/',  ru:'Фиолетовый'},
+      {en:'Grey',   tr:'/ɡreɪ/',    ru:'Серый'},
+    ]
+  },
+  {
+    id:4, icon:'👨‍👩‍👧', ru:'Семья', en:'Family',
+    words:[
+      {en:'Father',       tr:'/ˈfɑːðə/',    ru:'Отец / Папа'},
+      {en:'Mother',       tr:'/ˈmʌðə/',     ru:'Мать / Мама'},
+      {en:'Brother',      tr:'/ˈbrʌðə/',    ru:'Брат'},
+      {en:'Sister',       tr:'/ˈsɪstə/',    ru:'Сестра'},
+      {en:'Son',          tr:'/sʌn/',        ru:'Сын'},
+      {en:'Daughter',     tr:'/ˈdɔːtə/',    ru:'Дочь'},
+      {en:'Grandfather',  tr:'/ˈɡrænfɑːðə/',ru:'Дедушка'},
+      {en:'Grandmother',  tr:'/ˈɡrænmʌðə/',ru:'Бабушка'},
+      {en:'Uncle',        tr:'/ˈʌŋkl/',     ru:'Дядя'},
+      {en:'Aunt',         tr:'/ɑːnt/',       ru:'Тётя'},
+    ]
+  },
+  {
+    id:5, icon:'🍔', ru:'Еда и напитки', en:'Food & Drinks',
+    words:[
+      {en:'Bread',    tr:'/bred/',      ru:'Хлеб'},
+      {en:'Rice',     tr:'/raɪs/',      ru:'Рис'},
+      {en:'Meat',     tr:'/miːt/',      ru:'Мясо'},
+      {en:'Fish',     tr:'/fɪʃ/',       ru:'Рыба'},
+      {en:'Vegetables',tr:'/ˈvedʒtəblz/',ru:'Овощи'},
+      {en:'Fruit',    tr:'/fruːt/',     ru:'Фрукт'},
+      {en:'Water',    tr:'/ˈwɔːtə/',    ru:'Вода'},
+      {en:'Tea',      tr:'/tiː/',       ru:'Чай'},
+      {en:'Coffee',   tr:'/ˈkɒfi/',     ru:'Кофе'},
+      {en:'Juice',    tr:'/dʒuːs/',     ru:'Сок'},
+    ]
+  },
+  {
+    id:6, icon:'📅', ru:'Дни недели', en:'Days of the Week',
+    words:[
+      {en:'Monday',    tr:'/ˈmʌndeɪ/',   ru:'Понедельник'},
+      {en:'Tuesday',   tr:'/ˈtjuːzdeɪ/', ru:'Вторник'},
+      {en:'Wednesday', tr:'/ˈwenzdeɪ/',  ru:'Среда'},
+      {en:'Thursday',  tr:'/ˈθɜːzdeɪ/',  ru:'Четверг'},
+      {en:'Friday',    tr:'/ˈfraɪdeɪ/',  ru:'Пятница'},
+      {en:'Saturday',  tr:'/ˈsætədeɪ/',  ru:'Суббота'},
+      {en:'Sunday',    tr:'/ˈsʌndeɪ/',   ru:'Воскресенье'},
+      {en:'Today',     tr:'/təˈdeɪ/',    ru:'Сегодня'},
+      {en:'Tomorrow',  tr:'/təˈmɒrəʊ/',  ru:'Завтра'},
+      {en:'Yesterday', tr:'/ˈjestədeɪ/', ru:'Вчера'},
+    ]
+  },
+  {
+    id:7, icon:'🕐', ru:'Время', en:'Time',
+    words:[
+      {en:'Now',       tr:'/naʊ/',       ru:'Сейчас'},
+      {en:'Hour',      tr:'/ˈaʊə/',      ru:'Час'},
+      {en:'Minute',    tr:'/ˈmɪnɪt/',    ru:'Минута'},
+      {en:'Second',    tr:'/ˈsekənd/',   ru:'Секунда'},
+      {en:'Morning',   tr:'/ˈmɔːnɪŋ/',  ru:'Утро'},
+      {en:'Afternoon', tr:'/ˌɑːftəˈnuːn/',ru:'День / После полудня'},
+      {en:'Evening',   tr:'/ˈiːvnɪŋ/',  ru:'Вечер'},
+      {en:'Night',     tr:'/naɪt/',      ru:'Ночь'},
+      {en:'Early',     tr:'/ˈɜːli/',     ru:'Рано'},
+      {en:'Late',      tr:'/leɪt/',      ru:'Поздно'},
+    ]
+  },
+  {
+    id:8, icon:'🏙️', ru:'Город и места', en:'City & Places',
+    words:[
+      {en:'School',    tr:'/skuːl/',      ru:'Школа'},
+      {en:'Hospital',  tr:'/ˈhɒspɪtl/',  ru:'Больница'},
+      {en:'Supermarket',tr:'/ˈsuːpəˌmɑːkɪt/',ru:'Супермаркет'},
+      {en:'Bank',      tr:'/bæŋk/',       ru:'Банк'},
+      {en:'Restaurant',tr:'/ˈrestrɒnt/',  ru:'Ресторан'},
+      {en:'Park',      tr:'/pɑːk/',       ru:'Парк'},
+      {en:'Airport',   tr:'/ˈeəpɔːt/',    ru:'Аэропорт'},
+      {en:'Station',   tr:'/ˈsteɪʃn/',    ru:'Станция / Вокзал'},
+      {en:'Hotel',     tr:'/həʊˈtel/',    ru:'Гостиница'},
+      {en:'Library',   tr:'/ˈlaɪbrəri/',  ru:'Библиотека'},
+    ]
+  },
+  {
+    id:9, icon:'🚗', ru:'Транспорт', en:'Transport',
+    words:[
+      {en:'Car',        tr:'/kɑː/',        ru:'Автомобиль'},
+      {en:'Bus',        tr:'/bʌs/',         ru:'Автобус'},
+      {en:'Taxi',       tr:'/ˈtæksi/',      ru:'Такси'},
+      {en:'Bicycle',    tr:'/ˈbaɪsɪkl/',   ru:'Велосипед'},
+      {en:'Aeroplane',  tr:'/ˈeərəpleɪn/', ru:'Самолёт'},
+      {en:'Train',      tr:'/treɪn/',       ru:'Поезд'},
+      {en:'Ship',       tr:'/ʃɪp/',         ru:'Корабль'},
+      {en:'Motorcycle', tr:'/ˈməʊtəˌsaɪkl/',ru:'Мотоцикл'},
+      {en:'Ticket',     tr:'/ˈtɪkɪt/',      ru:'Билет'},
+      {en:'Subway',     tr:'/ˈsʌbweɪ/',     ru:'Метро'},
+    ]
+  },
+  {
+    id:10, icon:'🌦️', ru:'Погода', en:'Weather',
+    words:[
+      {en:'Weather',  tr:'/ˈweðə/',   ru:'Погода'},
+      {en:'Sunny',    tr:'/ˈsʌni/',   ru:'Солнечно'},
+      {en:'Rainy',    tr:'/ˈreɪni/',  ru:'Дождливо'},
+      {en:'Snowy',    tr:'/ˈsnəʊi/',  ru:'Снежно'},
+      {en:'Windy',    tr:'/ˈwɪndi/',  ru:'Ветрено'},
+      {en:'Hot',      tr:'/hɒt/',     ru:'Жарко'},
+      {en:'Cold',     tr:'/kəʊld/',   ru:'Холодно'},
+      {en:'Cloud',    tr:'/klaʊd/',   ru:'Облако'},
+      {en:'Fog',      tr:'/fɒɡ/',     ru:'Туман'},
+      {en:'Temperature',tr:'/ˈtemprətʃə/',ru:'Температура'},
+    ]
+  },
+  {
+    id:11, icon:'💼', ru:'Профессии', en:'Professions',
+    words:[
+      {en:'Teacher',   tr:'/ˈtiːtʃə/',   ru:'Учитель'},
+      {en:'Doctor',    tr:'/ˈdɒktə/',    ru:'Врач'},
+      {en:'Student',   tr:'/ˈstjuːdnt/', ru:'Студент'},
+      {en:'Worker',    tr:'/ˈwɜːkə/',    ru:'Рабочий'},
+      {en:'Police officer',tr:'/pəˈliːs ˈɒfɪsə/',ru:'Полицейский'},
+      {en:'Cook',      tr:'/kʊk/',        ru:'Повар'},
+      {en:'Driver',    tr:'/ˈdraɪvə/',   ru:'Водитель'},
+      {en:'Engineer',  tr:'/ˌendʒɪˈnɪə/',ru:'Инженер'},
+      {en:'Businessman',tr:'/ˈbɪznɪsmæn/',ru:'Бизнесмен'},
+      {en:'Nurse',     tr:'/nɜːs/',       ru:'Медсестра'},
+    ]
+  },
+  {
+    id:12, icon:'🏠', ru:'Дом и мебель', en:'Home & Furniture',
+    words:[
+      {en:'House',    tr:'/haʊs/',    ru:'Дом'},
+      {en:'Room',     tr:'/ruːm/',    ru:'Комната'},
+      {en:'Bed',      tr:'/bed/',     ru:'Кровать'},
+      {en:'Table',    tr:'/ˈteɪbl/', ru:'Стол'},
+      {en:'Chair',    tr:'/tʃeə/',   ru:'Стул'},
+      {en:'Kitchen',  tr:'/ˈkɪtʃɪn/',ru:'Кухня'},
+      {en:'Bathroom', tr:'/ˈbɑːθruːm/',ru:'Ванная комната'},
+      {en:'Window',   tr:'/ˈwɪndəʊ/',ru:'Окно'},
+      {en:'Door',     tr:'/dɔː/',     ru:'Дверь'},
+      {en:'Sofa',     tr:'/ˈsəʊfə/', ru:'Диван'},
+    ]
+  },
+  {
+    id:13, icon:'🧍', ru:'Тело человека', en:'Human Body',
+    words:[
+      {en:'Head',     tr:'/hed/',     ru:'Голова'},
+      {en:'Eyes',     tr:'/aɪz/',     ru:'Глаза'},
+      {en:'Nose',     tr:'/nəʊz/',    ru:'Нос'},
+      {en:'Mouth',    tr:'/maʊθ/',    ru:'Рот'},
+      {en:'Ears',     tr:'/ɪəz/',     ru:'Уши'},
+      {en:'Hand',     tr:'/hænd/',    ru:'Рука (кисть)'},
+      {en:'Leg',      tr:'/leɡ/',     ru:'Нога'},
+      {en:'Heart',    tr:'/hɑːt/',    ru:'Сердце'},
+      {en:'Back',     tr:'/bæk/',     ru:'Спина'},
+      {en:'Stomach',  tr:'/ˈstʌmək/',ru:'Желудок / Живот'},
+    ]
+  },
+  {
+    id:14, icon:'🎒', ru:'Учёба и школа', en:'School & Study',
+    words:[
+      {en:'Book',       tr:'/bʊk/',       ru:'Книга'},
+      {en:'Pen',        tr:'/pen/',        ru:'Ручка'},
+      {en:'Notebook',   tr:'/ˈnəʊtbʊk/', ru:'Тетрадь'},
+      {en:'Blackboard', tr:'/ˈblækbɔːd/',ru:'Доска'},
+      {en:'Homework',   tr:'/ˈhəʊmwɜːk/',ru:'Домашнее задание'},
+      {en:'Exam',       tr:'/ɪɡˈzæm/',   ru:'Экзамен'},
+      {en:'Lesson',     tr:'/ˈlesn/',     ru:'Урок'},
+      {en:'English',    tr:'/ˈɪŋɡlɪʃ/',  ru:'Английский язык'},
+      {en:'To study',   tr:'/tə ˈstʌdi/',ru:'Учиться'},
+      {en:'Alphabet',   tr:'/ˈælfəbet/', ru:'Алфавит'},
+    ]
+  },
+  {
+    id:15, icon:'🛍️', ru:'Покупки', en:'Shopping',
+    words:[
+      {en:'To buy',    tr:'/tə baɪ/',    ru:'Покупать'},
+      {en:'To sell',   tr:'/tə sel/',    ru:'Продавать'},
+      {en:'Expensive', tr:'/ɪkˈspensɪv/',ru:'Дорогой'},
+      {en:'Cheap',     tr:'/tʃiːp/',     ru:'Дешёвый'},
+      {en:'How much?', tr:'/haʊ mʌtʃ/',  ru:'Сколько стоит?'},
+      {en:'Money',     tr:'/ˈmʌni/',     ru:'Деньги'},
+      {en:'Shop',      tr:'/ʃɒp/',       ru:'Магазин'},
+      {en:'Clothes',   tr:'/kləʊðz/',    ru:'Одежда'},
+      {en:'Shoes',     tr:'/ʃuːz/',      ru:'Обувь'},
+      {en:'Receipt',   tr:'/rɪˈsiːt/',   ru:'Чек'},
+    ]
+  },
+  {
+    id:16, icon:'😊', ru:'Эмоции', en:'Emotions',
+    words:[
+      {en:'Happy',    tr:'/ˈhæpi/',    ru:'Счастливый'},
+      {en:'Sad',      tr:'/sæd/',      ru:'Грустный'},
+      {en:'Angry',    tr:'/ˈæŋɡri/',  ru:'Злой / Сердитый'},
+      {en:'Tired',    tr:'/ˈtaɪəd/',  ru:'Усталый'},
+      {en:'Worried',  tr:'/ˈwʌrid/',  ru:'Обеспокоенный'},
+      {en:'Scared',   tr:'/skeəd/',   ru:'Испуганный'},
+      {en:'Surprised',tr:'/səˈpraɪzd/',ru:'Удивлённый'},
+      {en:'Bored',    tr:'/bɔːd/',    ru:'Скучающий'},
+      {en:'Excited',  tr:'/ɪkˈsaɪtɪd/',ru:'Взволнованный / В предвкушении'},
+      {en:'Love',     tr:'/lʌv/',     ru:'Любовь / Любить'},
+    ]
+  },
+  {
+    id:17, icon:'🐶', ru:'Животные', en:'Animals',
+    words:[
+      {en:'Cat',      tr:'/kæt/',     ru:'Кошка'},
+      {en:'Dog',      tr:'/dɒɡ/',     ru:'Собака'},
+      {en:'Bird',     tr:'/bɜːd/',    ru:'Птица'},
+      {en:'Fish',     tr:'/fɪʃ/',     ru:'Рыба'},
+      {en:'Bear',     tr:'/beə/',     ru:'Медведь'},
+      {en:'Tiger',    tr:'/ˈtaɪɡə/', ru:'Тигр'},
+      {en:'Horse',    tr:'/hɔːs/',    ru:'Лошадь'},
+      {en:'Cow',      tr:'/kaʊ/',     ru:'Корова'},
+      {en:'Rabbit',   tr:'/ˈræbɪt/', ru:'Кролик'},
+      {en:'Monkey',   tr:'/ˈmʌŋki/', ru:'Обезьяна'},
+    ]
+  },
+  {
+    id:18, icon:'🏃', ru:'Глаголы действия', en:'Action Verbs',
+    words:[
+      {en:'To eat',   tr:'/tə iːt/',  ru:'Есть / Кушать'},
+      {en:'To drink', tr:'/tə drɪŋk/',ru:'Пить'},
+      {en:'To go',    tr:'/tə ɡəʊ/',  ru:'Идти / Ехать'},
+      {en:'To come',  tr:'/tə kʌm/',  ru:'Приходить'},
+      {en:'To see',   tr:'/tə siː/',  ru:'Видеть / Смотреть'},
+      {en:'To listen',tr:'/tə ˈlɪsn/',ru:'Слушать'},
+      {en:'To speak', tr:'/tə spiːk/',ru:'Говорить'},
+      {en:'To write', tr:'/tə raɪt/', ru:'Писать'},
+      {en:'To sleep', tr:'/tə sliːp/',ru:'Спать'},
+      {en:'To work',  tr:'/tə wɜːk/', ru:'Работать'},
+    ]
+  },
+  {
+    id:19, icon:'📱', ru:'Технологии', en:'Technology',
+    words:[
+      {en:'Phone',        tr:'/fəʊn/',        ru:'Телефон'},
+      {en:'Computer',     tr:'/kəmˈpjuːtə/',  ru:'Компьютер'},
+      {en:'Internet',     tr:'/ˈɪntənet/',    ru:'Интернет'},
+      {en:'Social media', tr:'/ˈsəʊʃl ˈmiːdiə/',ru:'Социальные сети'},
+      {en:'Application',  tr:'/ˌæplɪˈkeɪʃn/',ru:'Приложение'},
+      {en:'Password',     tr:'/ˈpɑːswɜːd/',  ru:'Пароль'},
+      {en:'Email',        tr:'/ˈiːmeɪl/',     ru:'Электронная почта'},
+      {en:'To charge',    tr:'/tə tʃɑːdʒ/',   ru:'Заряжать'},
+      {en:'Photo',        tr:'/ˈfəʊtəʊ/',     ru:'Фотография'},
+      {en:'Video',        tr:'/ˈvɪdiəʊ/',     ru:'Видео'},
+    ]
+  },
+  {
+    id:20, icon:'🏥', ru:'Здоровье', en:'Health',
+    words:[
+      {en:'Health',       tr:'/helθ/',         ru:'Здоровье'},
+      {en:'Ill / Sick',   tr:'/ɪl / sɪk/',    ru:'Больной'},
+      {en:'Headache',     tr:'/ˈhedeɪk/',      ru:'Головная боль'},
+      {en:'Fever',        tr:'/ˈfiːvə/',       ru:'Жар / Температура'},
+      {en:'Medicine',     tr:'/ˈmedsn/',       ru:'Лекарство'},
+      {en:'To see a doctor',tr:'/tə siː ə ˈdɒktə/',ru:'Обратиться к врачу'},
+      {en:'Operation',    tr:'/ˌɒpəˈreɪʃn/',  ru:'Операция'},
+      {en:'Allergy',      tr:'/ˈælərdʒi/',    ru:'Аллергия'},
+      {en:'To rest',      tr:'/tə rest/',      ru:'Отдыхать'},
+      {en:'Injection',    tr:'/ɪnˈdʒekʃn/',   ru:'Укол / Инъекция'},
+    ]
+  },
+  {
+    id:21, icon:'🌏', ru:'Страны и национальности', en:'Countries',
+    words:[
+      {en:'Russia',      tr:'/ˈrʌʃə/',      ru:'Россия'},
+      {en:'England',     tr:'/ˈɪŋɡlənd/',   ru:'Англия'},
+      {en:'China',       tr:'/ˈtʃaɪnə/',    ru:'Китай'},
+      {en:'USA',         tr:'/ˌjuː es ˈeɪ/',ru:'США'},
+      {en:'France',      tr:'/frɑːns/',      ru:'Франция'},
+      {en:'Germany',     tr:'/ˈdʒɜːməni/',  ru:'Германия'},
+      {en:'Japan',       tr:'/dʒəˈpæn/',    ru:'Япония'},
+      {en:'Kyrgyzstan',  tr:'/ˌkɪərɡɪˈstɑːn/',ru:'Кыргызстан'},
+      {en:'Language',    tr:'/ˈlæŋɡwɪdʒ/', ru:'Язык'},
+      {en:'Country',     tr:'/ˈkʌntri/',    ru:'Страна'},
+    ]
+  },
+  {
+    id:22, icon:'⚽', ru:'Спорт и хобби', en:'Sports & Hobbies',
+    words:[
+      {en:'Sport',        tr:'/spɔːt/',       ru:'Спорт'},
+      {en:'Football',     tr:'/ˈfʊtbɔːl/',   ru:'Футбол'},
+      {en:'Basketball',   tr:'/ˈbɑːskɪtbɔːl/',ru:'Баскетбол'},
+      {en:'Swimming',     tr:'/ˈswɪmɪŋ/',    ru:'Плавание'},
+      {en:'Running',      tr:'/ˈrʌnɪŋ/',     ru:'Бег'},
+      {en:'Music',        tr:'/ˈmjuːzɪk/',   ru:'Музыка'},
+      {en:'Drawing',      tr:'/ˈdrɔːɪŋ/',    ru:'Рисование'},
+      {en:'Reading',      tr:'/ˈriːdɪŋ/',    ru:'Чтение'},
+      {en:'Travelling',   tr:'/ˈtrævlɪŋ/',   ru:'Путешествия'},
+      {en:'Dancing',      tr:'/ˈdɑːnsɪŋ/',   ru:'Танцы'},
+    ]
+  },
+  {
+    id:23, icon:'🗣️', ru:'Разговорные фразы', en:'Common Phrases',
+    words:[
+      {en:"I don't understand", tr:'/aɪ dəʊnt ʌndəˈstænd/',ru:'Я не понимаю'},
+      {en:'How are you?',       tr:'/haʊ ɑː juː/',          ru:'Как дела?'},
+      {en:"I'm fine",           tr:'/aɪm faɪn/',             ru:'Я в порядке'},
+      {en:"What's your name?",  tr:'/wɒts jɔː neɪm/',       ru:'Как вас зовут?'},
+      {en:'My name is...',      tr:'/maɪ neɪm ɪz/',          ru:'Меня зовут...'},
+      {en:'Where is...?',       tr:'/weər ɪz/',              ru:'Где находится...?'},
+      {en:'How much is it?',    tr:'/haʊ mʌtʃ ɪz ɪt/',      ru:'Сколько это стоит?'},
+      {en:'Help me, please',    tr:'/help miː pliːz/',       ru:'Помогите мне, пожалуйста'},
+      {en:'I would like...',    tr:'/aɪ wʊd laɪk/',         ru:'Я хотел бы...'},
+      {en:"I don't know",       tr:'/aɪ dəʊnt nəʊ/',        ru:'Я не знаю'},
+    ]
+  },
+];
+
+// ==================== STATE ====================
+let currentTopic  = null;
+let currentMode   = 'flash';
+let cardIndex     = 0;
+let cardFlipped   = false;
+let quizIndex     = 0;
+let quizScore     = 0;
+let quizAnswered  = false;
+let quizOrder     = [];
+let writeIndex    = 0;
+let writeScore    = 0;
+let writeOrder    = [];
+let wordListOpen  = false;
+
+// ==================== MENU ====================
+function buildMenu() {
+  const grid = document.getElementById('topicsGrid');
+  TOPICS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `
+      <span class="icon">${t.icon}</span>
+      <span class="label">
+        <span class="label-ru">${t.ru}</span>
+        <span class="label-en">${t.en}</span>
+      </span>
+      <span class="num">${t.words.length} сл.</span>
+    `;
+    btn.onclick = () => openTopic(t);
+    grid.appendChild(btn);
+  });
+}
+
+function openTopic(topic) {
+  currentTopic = topic;
+  document.getElementById('headerTitle').textContent = topic.icon + ' ' + topic.ru;
+  document.getElementById('headerEn').textContent = topic.en;
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('trainer').classList.add('active');
+  switchMode('flash');
+}
+
+function goHome() {
+  document.getElementById('splash').style.display = 'flex';
+  document.getElementById('trainer').classList.remove('active');
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+  currentTopic = null;
+}
+
+// ==================== MODE SWITCH ====================
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['flash','quiz','write'][i] === mode);
+  });
+  document.getElementById('modeFlash').style.display  = mode === 'flash' ? 'flex' : 'none';
+  document.getElementById('modeQuiz').classList.toggle('hidden',  mode !== 'quiz');
+  document.getElementById('modeWrite').classList.toggle('hidden', mode !== 'write');
+  document.getElementById('modeResult').classList.add('hidden');
+
+  if (mode === 'flash') initFlash();
+  if (mode === 'quiz')  initQuiz();
+  if (mode === 'write') initWrite();
+}
+
+// ==================== FLASHCARD ====================
+function initFlash() {
+  cardIndex = 0; cardFlipped = false;
+  buildWordList();
+  showCard();
+}
+
+function showCard() {
+  const w = currentTopic.words[cardIndex];
+  document.getElementById('fcFront').textContent        = w.en;
+  document.getElementById('fcTranscription').textContent = w.tr;
+  document.getElementById('fcBack').textContent         = w.ru;
+  document.getElementById('fcBackSub').textContent      = w.tr;
+  document.getElementById('cardCounter').textContent    = `${cardIndex+1} / ${currentTopic.words.length}`;
+  cardFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  updateProgress(cardIndex+1, currentTopic.words.length);
+}
+
+function flipCard() {
+  cardFlipped = !cardFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', cardFlipped);
+}
+
+function nextCard() { if (cardIndex < currentTopic.words.length-1) { cardIndex++; showCard(); } }
+function prevCard() { if (cardIndex > 0) { cardIndex--; showCard(); } }
+
+function buildWordList() {
+  const body = document.getElementById('wordListBody');
+  body.innerHTML = '';
+  currentTopic.words.forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    const safeEn = w.en.replace(/'/g, "\\'");
+    row.innerHTML = `
+      <span class="wr-en">${w.en}</span>
+      <span class="wr-tr">${w.tr}</span>
+      <span class="wr-ru">${w.ru}</span>
+      <button class="wr-speak" onclick="speakText('${safeEn}')" title="Произнести">🔊</button>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function toggleWordList() {
+  wordListOpen = !wordListOpen;
+  document.getElementById('wordListBody').classList.toggle('open', wordListOpen);
+  document.getElementById('wlArrow').textContent = wordListOpen ? '▲' : '▼';
+}
+
+// ==================== QUIZ ====================
+function initQuiz() {
+  quizOrder = shuffle([...Array(currentTopic.words.length).keys()]);
+  quizIndex = 0; quizScore = 0; quizAnswered = false;
+  document.getElementById('scoreDisp').textContent = '★ 0';
+  showQuestion();
+}
+
+function showQuestion() {
+  if (quizIndex >= quizOrder.length) { showResult('quiz'); return; }
+  quizAnswered = false;
+  const wi   = quizOrder[quizIndex];
+  const word = currentTopic.words[wi];
+  document.getElementById('qQuestion').textContent      = word.en;
+  document.getElementById('qTranscription').textContent = word.tr;
+  document.getElementById('feedbackBar').className      = 'feedback-bar';
+  document.getElementById('nextQBtn').className         = 'next-btn';
+
+  const all   = currentTopic.words.map((w,i) => ({idx:i, ru:w.ru}));
+  const wrong = shuffle(all.filter(x => x.idx !== wi)).slice(0,3);
+  const opts  = shuffle([...wrong, {idx:wi, ru:word.ru}]);
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.ru;
+    btn.onclick = () => answerQuiz(btn, opt.idx === wi, word.ru, word.en);
+    grid.appendChild(btn);
+  });
+  updateProgress(quizIndex+1, quizOrder.length);
+}
+
+function answerQuiz(btn, correct, correctRu, correctEn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const fb = document.getElementById('feedbackBar');
+  if (correct) {
+    btn.classList.add('correct');
+    fb.textContent = '✓ Correct! Well done!';
+    fb.className = 'feedback-bar show ok';
+    quizScore++;
+    document.getElementById('scoreDisp').textContent = '★ ' + quizScore;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correctRu) b.classList.add('correct');
+    });
+    fb.textContent = `✗ Неверно. Правильный ответ: "${correctRu}"`;
+    fb.className = 'feedback-bar show fail';
+  }
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.getElementById('nextQBtn').className = 'next-btn show';
+  setTimeout(() => speakText(correctEn), 700);
+}
+
+function nextQuestion() { quizIndex++; showQuestion(); }
+
+// ==================== WRITE ====================
+function initWrite() {
+  writeOrder = shuffle([...Array(currentTopic.words.length).keys()]);
+  writeIndex = 0; writeScore = 0;
+  showWrite();
+}
+
+function showWrite() {
+  if (writeIndex >= writeOrder.length) { showResult('write'); return; }
+  const wi   = writeOrder[writeIndex];
+  const word = currentTopic.words[wi];
+  document.getElementById('wPrompt').textContent = word.ru;
+  document.getElementById('wHint').textContent   = `Транскрипция: ${word.tr}`;
+  const inp = document.getElementById('wInput');
+  inp.value = ''; inp.className = 'writing-input'; inp.disabled = false;
+  document.getElementById('wReveal').className    = 'answer-reveal';
+  document.getElementById('nextWBtn').style.display = 'none';
+  updateProgress(writeIndex+1, writeOrder.length);
+  setTimeout(() => inp.focus(), 100);
+}
+
+function checkWrite() {
+  const wi   = writeOrder[writeIndex];
+  const word = currentTopic.words[wi];
+  const inp  = document.getElementById('wInput');
+  const val  = inp.value.trim();
+  if (!val) return;
+  const correct = val.toLowerCase() === word.en.toLowerCase();
+  inp.className = 'writing-input ' + (correct ? 'correct-input' : 'wrong-input');
+  inp.disabled = true;
+  const reveal = document.getElementById('wReveal');
+  reveal.textContent = correct
+    ? `✓ Correct! "${word.en}"`
+    : `✗ Правильно: "${word.en}"`;
+  reveal.className = 'answer-reveal show';
+  if (correct) { writeScore++; document.getElementById('scoreDisp').textContent = '★ ' + writeScore; }
+  document.getElementById('nextWBtn').style.display = 'block';
+  setTimeout(() => speakText(word.en), 500);
+}
+
+function nextWrite() { writeIndex++; showWrite(); }
+
+// ==================== RESULT ====================
+function showResult(mode) {
+  document.getElementById('modeFlash').style.display = 'none';
+  document.getElementById('modeQuiz').classList.add('hidden');
+  document.getElementById('modeWrite').classList.add('hidden');
+  document.getElementById('modeResult').classList.remove('hidden');
+
+  const total = currentTopic.words.length;
+  const score = mode === 'quiz' ? quizScore : writeScore;
+  const pct   = Math.round(score/total*100);
+  document.getElementById('resScore').textContent = `${score}/${total}`;
+  let emoji, msg;
+  if (pct===100){ emoji='🏆'; msg='Perfect score! Excellent work! Keep it up!'; }
+  else if(pct>=80){ emoji='🎉'; msg='Great job! Almost perfect — you\'re doing brilliantly!'; }
+  else if(pct>=60){ emoji='👍'; msg='Not bad! A bit more practice and you\'ll be perfect!'; }
+  else if(pct>=40){ emoji='💪'; msg='Keep going! Practice makes perfect — try again!'; }
+  else            { emoji='📖'; msg='Don\'t give up! Review the flashcards and try again!'; }
+  document.getElementById('resEmoji').textContent = emoji;
+  document.getElementById('resMsg').textContent   = msg;
+}
+
+function retryMode() { switchMode(currentMode); }
+
+// ==================== PROGRESS ====================
+function updateProgress(cur, total) {
+  document.getElementById('progText').textContent    = `${cur}/${total}`;
+  document.getElementById('progBar').style.width     = `${Math.round(cur/total*100)}%`;
+}
+
+// ==================== TTS (Google Translate) ====================
+let ttsAudio = null;
+
+function speakText(text) {
+  if (!text) return;
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+
+  // Google Translate TTS — natural British English voice
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-GB&client=tw-ob&q=${encodeURIComponent(text)}`;
+  ttsAudio = new Audio(url);
+  ttsAudio.volume = 1.0;
+
+  const btns = document.querySelectorAll('.speak-btn, .speak-btn-white, .wr-speak');
+  btns.forEach(b => b.classList.add('speaking'));
+  ttsAudio.onended = () => btns.forEach(b => b.classList.remove('speaking'));
+  ttsAudio.onerror = () => {
+    btns.forEach(b => b.classList.remove('speaking'));
+    // Fallback: Web Speech API
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB'; u.rate = 0.9;
+      const v = speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    }
+  };
+  ttsAudio.play().catch(() => {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB'; u.rate = 0.9;
+      speechSynthesis.speak(u);
+    }
+  });
+}
+
+function speakCurrent() {
+  if (!currentTopic) return;
+  speakText(currentTopic.words[cardIndex].en);
+}
+
+// ==================== UTILS ====================
+function shuffle(arr) {
+  for (let i=arr.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ==================== INIT ====================
+buildMenu();
+</script>
+</body>
+</html>
